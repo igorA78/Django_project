@@ -1,27 +1,49 @@
-from datetime import datetime
-from random import randint
+import json
 
 from django.core.management import BaseCommand
 
-from catalog.models import Product
+from catalog.models import Category, Product
+
+FIXTURE_FILE = 'data.json'
+
 
 class Command(BaseCommand):
+
     def handle(self, *args, **options):
-        product_list = [{'product_name': 'Тыква', 'product_description': 'Желтая',
-                         'product_category': 'Овощи',
-                         'product_price': 60, 'create_date': datetime.now()},
-                        {'product_name': 'Морковь', 'product_description': 'Сочная',
-                         'product_category': 'Овощи',
-                         'product_price': 70, 'create_date': datetime.now()},
-                        {'product_name': 'Апельсин', 'product_description': 'Оранжевый',
-                         'product_category': 'Фрукты',
-                         'product_price': 80, 'create_date': datetime.now()},
-                        {'product_name': 'Огурцы', 'product_description': 'Зеленые',
-                         'product_category': 'Овощи',
-                         'product_price': 90, 'create_date': datetime.now()},
-                        ]
-        products_for_create = []
-        Product.objects.all().delete()
-        for product in product_list:
-            products_for_create.append(Product(**product))
-        Product.objects.bulk_create(products_for_create)
+  #      Category.objects.all().delete()
+  #      Product.objects.all().delete()
+
+        with open(FIXTURE_FILE, 'r', encoding='utf-8') as file:
+            file_data = json.load(file)
+
+        categories_list = []
+        products_list = []
+        for item in file_data:
+            if 'category' in item['model']:
+                categories_list.append(Category(
+                    pk=item['pk'],
+                    name=item['fields']['name'],
+                    description=item['fields']['description']
+                ))
+        for item in file_data:
+            if 'product' in item['model']:
+
+                category = None
+                for category_item in categories_list:
+                    if category_item.pk == item['fields']['category']:
+                        category = category_item
+                        break
+
+                products_list.append(Product(
+                    pk=item['pk'],
+                    name=item['fields']['name'],
+                    description=item['fields']['description'],
+                    image=item['fields']['image'],
+                    category=category,
+                    price=item['fields']['price'],
+                    created_at=item['fields']['created_at'],
+                    changed_at=item['fields']['changed_at'],
+                ))
+
+        Category.objects.bulk_create(categories_list)
+        Product.objects.bulk_create(products_list)
