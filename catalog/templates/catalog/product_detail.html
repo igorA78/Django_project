@@ -1,0 +1,26 @@
+{% extends 'catalog/base.html' %}
+{% load static %}
+{% load catalog_tags%}
+
+{% block internal_navigation %}
+{% endblock %}
+
+{% block content %}
+<div class="container bg-green my-5">
+    <div class="row p-3">
+        <div class="col-6 text-white">
+            <h3>Категория: {{ object.category|lower }}</h3>
+            <h1 class="pt-4">{{ object.name }}</h1>
+            <p class="fs-5">{{ object.description }}</p>
+            <h3 class="py-4">Цена: {{ object.price }} Руб/кг</h3>
+            <p>Первые поставки: {{ object.created_at|date:'d.m.Y' }}<br/>
+                Последние изменения {{ object.changed_at|date:'d.m.Y' }}</p>
+            <a href="{% url 'catalog:index' %}" class="text-white">На главную</a>
+            <a href="{% url 'catalog:create' %}" class="text-white px-4">Добавить продукт</a>
+        </div>
+        <div class="col-6 p-0 text-end align-self-center">
+            <img src="{% mediapath product.image%}" class="img-fluid" alt="{{ product.name }}">
+        </div>
+    </div>
+</div>
+{% endblock %}
