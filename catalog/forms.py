@@ -1,14 +1,65 @@
 from django import forms
-from catalog.models import Product
 
-class NewProductForm(forms.ModelForm):
-    """Form for the image model"""
+from catalog.models import Product, UserQuestion, Delivery
+from const import FORBIDDEN_WORDS_IN_FORMS
+
+
+class StyleFormMixin:
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field_name, field in self.fields.items():
+            field.widget.attrs['class'] = 'form-control'
+            if isinstance(field.widget, forms.widgets.Textarea):
+                field.widget.attrs['rows'] = 3
+            if isinstance(field.widget, forms.widgets.CheckboxInput):
+                field.widget.attrs['class'] = 'form-check-input m-2'
+
+
+class ProductForm(StyleFormMixin, forms.ModelForm):
     class Meta:
         model = Product
-        fields = (
-            'name',
-            'description',
-            'image',
-            'category',
-            'price',
-        )
+        exclude = ('created_at', 'changed_at',)
+        labels = {
+            'name': 'Наименование',
+            'description': 'Описание продукта',
+            'image': 'Изображение продукта',
+            'category': 'Категория',
+            'price': 'Цена (Руб/кг)',
+        }
+
+    def clean(self):
+        cleaned_data = super().clean()
+        name_description = cleaned_data.get('name') + cleaned_data.get('description')
+
+        for word in FORBIDDEN_WORDS_IN_FORMS:
+            if word in name_description:
+                raise forms.ValidationError('Увы, но это слово запрещено!')
+
+        return cleaned_data
+
+
+class UserQuestionForm(StyleFormMixin, forms.ModelForm):
+    class Meta:
+        model = UserQuestion
+        exclude = ('created_at',)
+        labels = {
+            'user_name': 'Ваше имя',
+            'phone': 'Телефон для связи',
+            'email': 'Почта для связи',
+            'question': 'Ваш вопрос',
+        }
+
+class DeliveryForm(StyleFormMixin, forms.ModelForm):
+    class Meta:
+        model = Delivery
+        fields = '__all__'
+
+    def clean_is_current(self):
+        cleaned_data = self.cleaned_data['is_current']
+
+        print(len(self.cleaned_data['product'].delivery_set.filter(is_current=True)))
+        if (cleaned_data):
+            if len(self.cleaned_data['product'].delivery_set.filter(is_current=True)) > 0:
+                raise forms.ValidationError('У продукта может быть только одна текущая доставка')
+
+        return cleaned_data
