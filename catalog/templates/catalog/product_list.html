@@ -54,12 +54,14 @@
                             {% endif %}
                         </div>
                         <div class="card-footer text-center">
+                            {% if perms.catalog.can_moderate or product.owner == user %}
                             <a href="{% url 'catalog:update' product.pk %}"
                                class="btn btn-warning
                                       {% bg_dark_color forloop.parentloop.counter %}
                                       text-white border-0">
                                 <i class="bi bi-pencil"></i>
                             </a>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
@@ -70,4 +72,3 @@
 </div>
 {% endfor %}
 {% endblock %}
-

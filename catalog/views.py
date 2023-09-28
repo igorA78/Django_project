@@ -43,10 +43,13 @@ class ProductUpdateView(UpdateView):
 class UserQuestionCreateView(CreateView):
     model = UserQuestion
     form_class = UserQuestionForm
-    company_contacts = CompanyContact.objects.all()
-    company_contacts = sorted(company_contacts, key=lambda item: item.pk)
-    extra_context = {'cont': company_contacts}
+    # company_contacts = CompanyContact.objects.all()
+    # company_contacts = sorted(company_contacts, key=lambda item: item.pk)
+    # extra_context = {'cont': company_contacts}
     success_url = reverse_lazy('catalog:contact')
+
+    def get_context_data(self, **kwargs):
+        return super().get_context_data( **kwargs)
 
 
 class DeliveryCreateView(CreateView):
