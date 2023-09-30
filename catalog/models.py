@@ -21,7 +21,7 @@ class Category(models.Model):
 
 
 class Product(models.Model):
-    user_admin = User.objects.filter(is_superuser=True).first().pk
+   # user_admin = User.objects.filter(is_superuser=True).first().pk
 
     name = models.CharField(max_length=100, verbose_name='Наименование')
     description = models.TextField(verbose_name='Описание', **NULLABLE)
@@ -30,7 +30,7 @@ class Product(models.Model):
     price = models.IntegerField(verbose_name='Цена', **NULLABLE)
     created_at = models.DateField(verbose_name='Дата создания', auto_now_add=True)
     changed_at = models.DateField(verbose_name='Дата изменения', auto_now=True)
-    owner = models.ForeignKey(User, on_delete=models.SET_DEFAULT, default=user_admin, verbose_name='Автор')
+    owner = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Автор')
 
 
     def __str__(self):
