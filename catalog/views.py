@@ -3,12 +3,14 @@ from django.views.generic import ListView, DetailView, CreateView, UpdateView
 
 from catalog.forms import ProductForm, UserQuestionForm, DeliveryForm
 from catalog.models import Category, Product, CompanyContact, UserQuestion, Delivery
+from catalog.services import get_category_set
 
 
 class ProductListView(ListView):
     model = Product
 
-    def get_context_data(self):
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
         data = []
         categories = Category.objects.all()
         for category in categories:
@@ -17,7 +19,8 @@ class ProductListView(ListView):
                 'products': Product.objects.filter(category=category.pk),
             })
         data = sorted(data, key=lambda item: item['category'].pk)
-        return {'data': data}
+        context['categories'] = get_category_set()
+        return context
 
 
 class ProductDetailView(DetailView):
